@@ -1,9 +1,15 @@
 #!/usr/bin/python
-import threading, time, subprocess, shlex
+import threading, time, subprocess, shlex, sys, argparse
 
-defcmd="ls /usr"
-hosts=[]
+parser=argparse.ArgumentParser(description="Execute a command on many machines, simultaneously and precisely")
+parser.add_argument('-l', '--list', metavar='HOSTS', default='host.list', help='a file that contains a list of hosts, with each host on a single line, and optionally followed by a command to be executed on that host')
+parser.add_argument('-c', '--command', help='default command to be executed on remote hosts, if none is explicitly specified in host list. Either a command or the default command should be given for each host')
+args=parser.parse_args()
+# print vars(args)
+
 cmds={}
+hosts=[]
+defcmd=args.command
 cmds.setdefault(defcmd)
 
 for line in open('host.list').readlines():
@@ -12,6 +18,11 @@ for line in open('host.list').readlines():
 	hosts.append(host)
 	if len(line)>1:
 		cmds[host]=line[1]
+	elif defcmd==None:
+		print "Neither a command nor the default command is given for host %s. Exiting.\n" % host
+		sys.exit(-1)
+
+sys.exit()
 
 
 count=0
@@ -33,7 +44,7 @@ def work(host):
 	condition.release()
 
 	print host+' start\n',
-	cmd = cmds.get(host) or defcmd
+	# cmd = cmds.get(host) or defcmd
 	shell.stdin.write(cmds[host] + '; exit\n')
 	shell.stdin.flush()
 	output[host] = shell.communicate()   # returns (stdout, stderr)

@@ -22,7 +22,7 @@ for line in open('host.list').readlines():
 		print "Neither a command nor the default command is given for host %s. Exiting.\n" % host
 		sys.exit(-1)
 
-sys.exit()
+#sys.exit()
 
 
 count=0
